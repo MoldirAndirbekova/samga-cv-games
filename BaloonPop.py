@@ -1,4 +1,3 @@
-# Import
 import random
 import pygame
 import cv2
@@ -6,7 +5,7 @@ import numpy as np
 from cvzone.HandTrackingModule import HandDetector
 import time
 
-# Initialize 
+# Initialize Pygame
 pygame.init()
 
 # Create Window/Display
@@ -23,63 +22,67 @@ cap = cv2.VideoCapture(0)
 cap.set(3, 1280)  # width
 cap.set(4, 720)  # height
 
-# Images
+# Load Balloon Image
 imgBalloon = pygame.image.load('BalloonRed.png').convert_alpha()
 rectBalloon = imgBalloon.get_rect()
 rectBalloon.x, rectBalloon.y = 500, 300
 
-# Variables
-speed = 14  # Faster starting speed
+# Game Variables
+speed = 14
 score = 0
 startTime = time.time()
 totalTime = 30
 
-# Detector
+# Hand Detector
 detector = HandDetector(detectionCon=0.8, maxHands=1)
 
+# Reset Balloon Position
 def resetBalloon():
-    rectBalloon.x = random.randint(100, img.shape[1] - 100)
-    rectBalloon.y = img.shape[0] + 50
+    rectBalloon.x = random.randint(100, width - 100)
+    rectBalloon.y = height + 50
 
-# Main loop
+# Main Game Loop
 start = True
 while start:
-    # Get Events
+    # Event Handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             start = False
             pygame.quit()
 
-    # Apply Logic
+    # Calculate Remaining Time
     timeRemain = int(totalTime - (time.time() - startTime))
+    
     if timeRemain < 0:
         window.fill((255, 255, 255))
-
         font = pygame.font.SysFont('Arial', 50)
-
         textScore = font.render(f'Your Score: {score}', True, (50, 50, 255))
-        textTime = font.render(f'Time UP', True, (50, 50, 255))
+        textTime = font.render('Time UP', True, (50, 50, 255))
         window.blit(textScore, (450, 350))
         window.blit(textTime, (530, 275))
-
     else:
-        # OpenCV
+        # Read from webcam
         success, img = cap.read()
+        if not success:
+            continue  # Skip loop if frame is not read properly
+
         img = cv2.flip(img, 1)
         hands, img = detector.findHands(img, flipType=False)
 
-        rectBalloon.y -= speed  # Move the balloon up
+        # Move the balloon up
+        rectBalloon.y -= speed
 
-        # If balloon reaches the top without pop
+        # If balloon reaches top without being popped
         if rectBalloon.y < 0:
             resetBalloon()
-            speed += 1.5  # Even faster speed increase
-            if speed > 22:  # New max speed limit
+            speed += 1.5
+            if speed > 22:
                 speed = 22
 
+        # Check if hand pops the balloon
         if hands:
             hand = hands[0]
-            x, y = hand['lmList'][8][0:2]
+            x, y = hand['lmList'][8][0:2]  # Index fingertip
             if rectBalloon.collidepoint(x, y):
                 resetBalloon()
                 score += 10
@@ -87,6 +90,7 @@ while start:
                 if speed > 22:
                     speed = 22
 
+        # Convert and display OpenCV frame in pygame
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         imgRGB = np.rot90(imgRGB)
         frame = pygame.surfarray.make_surface(imgRGB).convert()
@@ -94,7 +98,8 @@ while start:
         window.blit(frame, (0, 0))
         window.blit(imgBalloon, rectBalloon)
 
-        font = pygame.font.Font('Marcellus-Regular.ttf', 50)
+        # Score and Time UI
+        font = pygame.font.Font('Marcellus-Regular.ttf', 50)  # Replace with Arial if needed
         textScore = font.render(f'Score: {score}', True, (50, 50, 255))
         textTime = font.render(f'Time: {timeRemain}', True, (50, 50, 255))
         window.blit(textScore, (35, 35))
@@ -102,5 +107,4 @@ while start:
 
     # Update Display
     pygame.display.update()
-    # Set FPS
     clock.tick(fps)
