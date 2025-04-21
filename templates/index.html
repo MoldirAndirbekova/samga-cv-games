@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Выбор сложности</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+           background: url('/static/background_img.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        h1 {
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        .button-container {
+             margin-left: 75px;
+              margin-top: 400px;
+        }
+        a {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            background-color: #ffcc00;
+            border-radius: 10px;
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+        }
+        a:hover {
+            background-color: #ff9900;
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container">
+        <h1>Select difficulty level</h1>
+        <a href="{{ url_for('set_difficulty', level='easy') }}">Easy</a>
+        <a href="{{ url_for('set_difficulty', level='medium') }}">Medium</a>
+        <a href="{{ url_for('set_difficulty', level='hard') }}">Hard</a>
+    </div>
+</body>
+</html>
+
