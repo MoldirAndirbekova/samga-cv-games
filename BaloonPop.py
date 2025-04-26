@@ -5,8 +5,9 @@ import numpy as np
 from cvzone.HandTrackingModule import HandDetector
 import time
 
-# Initialize Pygame
+# Initialize Pygame and Mixer
 pygame.init()
+pygame.mixer.init()
 
 # Create Window/Display
 width, height = 1280, 720
@@ -26,6 +27,9 @@ cap.set(4, 720)  # height
 imgBalloon = pygame.image.load('BalloonRed.png').convert_alpha()
 rectBalloon = imgBalloon.get_rect()
 rectBalloon.x, rectBalloon.y = 500, 300
+
+# Load Sound
+popSound = pygame.mixer.Sound('pop.mp3')  # Make sure this file exists
 
 # Game Variables
 speed = 14
@@ -64,7 +68,7 @@ while start:
         # Read from webcam
         success, img = cap.read()
         if not success:
-            continue  # Skip loop if frame is not read properly
+            continue
 
         img = cv2.flip(img, 1)
         hands, img = detector.findHands(img, flipType=False)
@@ -84,6 +88,7 @@ while start:
             hand = hands[0]
             x, y = hand['lmList'][8][0:2]  # Index fingertip
             if rectBalloon.collidepoint(x, y):
+                popSound.play()
                 resetBalloon()
                 score += 10
                 speed += 1.5
@@ -99,7 +104,7 @@ while start:
         window.blit(imgBalloon, rectBalloon)
 
         # Score and Time UI
-        font = pygame.font.Font('Marcellus-Regular.ttf', 50)  # Replace with Arial if needed
+        font = pygame.font.SysFont('Arial', 50)  # You can change the font if needed
         textScore = font.render(f'Score: {score}', True, (50, 50, 255))
         textTime = font.render(f'Time: {timeRemain}', True, (50, 50, 255))
         window.blit(textScore, (35, 35))
